@@ -11,9 +11,10 @@ ApplicationWindow {
 
     id: mainWindow
     visible: true
-    visibility: "FullScreen"
+    visibility: "Windowed"
     width: 960
     height: 540
+    property bool isFullScreen: false;
 
     title: qsTr("XorGame 1.0")
 
@@ -28,70 +29,6 @@ ApplicationWindow {
     //Scores of player B
     property int playerBScore: 0
 
-    //new game
-    function newGame() {
-        // delete old game
-        for(var i = 0; i < playerAObjects.length; ++i) {
-            if(playerAObjects[i])
-                playerAObjects[i].destroy();
-        }
-        for(var i = 0; i < playerBObjects.length; ++i) {
-            if(playerBObjects[i])
-                playerBObjects[i].destroy();
-        }
-        for(var i = 0; i < timers.length; ++i) {
-            if(timers[i])
-                timers[i].destroy();
-        }
-
-        playerAObjects = []
-        playerBObjects = []
-        timers = []
-        playerAScore = 0;
-        playerBScore = 0;
-
-        var playerAComponents = []
-        var playerBComponents = []
-
-
-        for(var i = 0; i < 8; ++i) {
-            playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
-            playerAObjects = playerAObjects.concat(
-                    [playerAComponents[i].createObject(mainWindow, {
-                        identifier: Logic.Owner.PlayerA + i,
-                        n: i,
-                        x: Qt.binding(function() { return mainWindow.width / 10 + this.n * ((
-                            mainWindow.height < mainWindow.width ?
-                            mainWindow.height * 0.12:
-                            mainWindow.width * 0.12) + 10) }),
-                        y: Qt.binding(function() { return mainWindow.height / 3 }),
-                        count: 50,
-                        owner: Logic.Owner.PlayerA,
-                        shipType: Logic.ShipType.JetFighter
-                        })]);
-            playerAObjects[i].init();
-        }
-
-        for(var i = 0; i < 8; ++i) {
-            playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
-            playerBObjects = playerBObjects.concat(
-                    [playerBComponents[i].createObject(mainWindow, {
-                        identifier: Logic.Owner.PlayerB + i,
-                        n: i,
-                        x: Qt.binding(function() { return mainWindow.width / 10 + this.n * ((
-                            mainWindow.height < mainWindow.width ?
-                            mainWindow.height * 0.12:
-                            mainWindow.width * 0.12) + 10) }),
-                        y: Qt.binding(function() { return 2 * mainWindow.height / 3 }),
-                        count: 100,
-                        owner: Logic.Owner.PlayerB,
-                        shipType: Logic.ShipType.JetFighter
-                        })]);
-            playerBObjects[i].init();
-        }
-
-    }
-
     Component.onCompleted: {
         mediaplayer.play();
         newGame();
@@ -101,13 +38,7 @@ ApplicationWindow {
         source: "deep-space.jpg"
     }
 
-    //play music
-    MediaPlayer {
-        id: mediaplayer
-        source: "Star_Wars_-_Fantasy_Suite_Movement_2_-_Jarrod_Radnich_Virtuosic_Piano_Solo_4K[YoutubeConverter.Me].mp3"
-        volume: volumeSlider.value
-    }
-
+    //handle clicks
     MouseArea {
         anchors.fill: parent
         onClicked: {
@@ -120,21 +51,55 @@ ApplicationWindow {
         }
     }
 
+    //play music
+    MediaPlayer {
+        id: mediaplayer
+        source: "Star_Wars_-_Fantasy_Suite_Movement_2_-_Jarrod_Radnich_Virtuosic_Piano_Solo_4K[YoutubeConverter.Me].mp3"
+        volume: volumeSlider.value
+    }
+
     //volume slider
     Slider {
         id: volumeSlider
-        x: parent.width * 0.87
-        y: parent.height * 0.02
+        x: mainWindow.width * 0.9
+        y: mainWindow.height * 0.02
         value: 0.2
+        height: mainWindow.height * 0.02;
+        width: mainWindow.width * 0.1;
     }
     //and speaker icon
     Image {
-        x: parent.width * 0.85
-        y: parent.height * 0.02
+        x: mainWindow.width * 0.88
+        y: mainWindow.height * 0.015
         width: parent.width * 0.02
         height: width
         source: "speaker.png"
     }
+
+    //fullscreen switcher
+    Image {
+        id: screenSwitcher
+        x: mainWindow.width * 0.96
+        y: mainWindow.height * 0.93
+        width: mainWindow.width * 0.03
+        height: width
+        source: isFullScreen ? "windowed.png" : "fullscreen.png"
+
+        MouseArea {
+            anchors.fill: screenSwitcher
+            onClicked: {
+                if(mainWindow.isFullScreen){
+                    mainWindow.visibility = "Windowed";
+                    mainWindow.isFullScreen = false;
+                }
+                else {
+                    mainWindow.visibility = "FullScreen";
+                    mainWindow.isFullScreen = true;
+                }
+            }
+        }
+    }
+
 
     // Show Player A scores at the top
     Rectangle {
@@ -250,5 +215,228 @@ ApplicationWindow {
         }
         color: "Transparent"
     } // close button
+
+
+    //new game
+    function newGame() {
+        // delete old game
+        for(var i = 0; i < playerAObjects.length; ++i) {
+            if(playerAObjects[i])
+                playerAObjects[i].destroy();
+        }
+        for(var i = 0; i < playerBObjects.length; ++i) {
+            if(playerBObjects[i])
+                playerBObjects[i].destroy();
+        }
+        for(var i = 0; i < timers.length; ++i) {
+            if(timers[i])
+                timers[i].destroy();
+        }
+
+        playerAObjects = []
+        playerBObjects = []
+        timers = []
+        playerAScore = 0;
+        playerBScore = 0;
+
+        var playerAComponents = []
+        var playerBComponents = []
+
+        var itemSize = mainWindow.height < mainWindow.width ?
+                       mainWindow.height * 0.12:
+                       mainWindow.width * 0.12;
+
+        // playerA first line
+        for(var i = 0; i < 8; ++i) {
+            if(i < 3 || i > 4) {
+                playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerAObjects = playerAObjects.concat(
+                        [playerAComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerA + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return mainWindow.height / 3 }),
+                            count: 100,
+                            owner: Logic.Owner.PlayerA,
+                            shipType: Logic.ShipType.JetFighter
+                            })]);
+                playerAObjects[i].init();
+            }
+            else {
+                playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerAObjects = playerAObjects.concat(
+                        [playerAComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerA + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return mainWindow.height / 3 }),
+                            count: 50,
+                            owner: Logic.Owner.PlayerA,
+                            shipType: Logic.ShipType.HeavyFighter
+                            })]);
+                playerAObjects[i].init();
+            }
+        }
+        //player A second line
+        for(var i = 0; i < 8; ++i) {
+            if(i < 2 || i > 5) {
+                playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerAObjects = playerAObjects.concat(
+                        [playerAComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerA + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return mainWindow.height / 3 - (mainWindow.height < mainWindow.width ?
+                                                                                       mainWindow.height * 0.12:
+                                                                                       mainWindow.width * 0.12) - 10  }),
+                            count: 30,
+                            owner: Logic.Owner.PlayerA,
+                            shipType: Logic.ShipType.Cruiser
+                            })]);
+                playerAObjects[i].init();
+            }
+            else if(i == 3 || i == 4) {
+                playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerAObjects = playerAObjects.concat(
+                        [playerAComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerA + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return mainWindow.height / 3 - (mainWindow.height < mainWindow.width ?
+                                                                                       mainWindow.height * 0.12:
+                                                                                       mainWindow.width * 0.12) - 10 }),
+                            count: 5,
+                            owner: Logic.Owner.PlayerA,
+                            shipType: Logic.ShipType.Destroyer
+                            })]);
+                playerAObjects[i].init();
+            }
+             else {
+                playerAComponents = playerAComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerAObjects = playerAObjects.concat(
+                        [playerAComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerA + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return mainWindow.height / 3 - (mainWindow.height < mainWindow.width ?
+                                                                                       mainWindow.height * 0.12:
+                                                                                       mainWindow.width * 0.12) - 10 }),
+                            count: 20,
+                            owner: Logic.Owner.PlayerA,
+                            shipType: Logic.ShipType.Drednot
+                            })]);
+                playerAObjects[i].init();
+            }
+        }
+
+
+
+        //player B first line
+        for(var i = 0; i < 8; ++i) {
+            if(i < 3 || i > 4) {
+                playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerBObjects = playerBObjects.concat(
+                        [playerBComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerB + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return 2 * mainWindow.height / 3 }),
+                            count: 100,
+                            owner: Logic.Owner.PlayerB,
+                            shipType: Logic.ShipType.JetFighter
+                            })]);
+                playerBObjects[i].init();
+            }
+            else {
+                playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerBObjects = playerBObjects.concat(
+                        [playerBComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerB + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return 2 * mainWindow.height / 3 }),
+                            count: 50,
+                            owner: Logic.Owner.PlayerB,
+                            shipType: Logic.ShipType.HeavyFighter
+                            })]);
+                playerBObjects[i].init();
+            }
+        }
+        //playerB second line
+        for(var i = 0; i < 8; ++i) {
+            if(i < 2 || i > 5) {
+                playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerBObjects = playerBObjects.concat(
+                        [playerBComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerB + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                            y: Qt.binding(function() { return 2 * mainWindow.height / 3 + (mainWindow.height < mainWindow.width ?
+                                                                                           mainWindow.height * 0.12:
+                                                                                           mainWindow.width * 0.12) + 10 }),
+                            count: 30,
+                            owner: Logic.Owner.PlayerB,
+                            shipType: Logic.ShipType.Cruiser
+                           })]);
+                playerBObjects[i].init();
+            }
+            else if(i == 3 || i == 4) {
+                playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerBObjects = playerBObjects.concat(
+                     [playerBComponents[i].createObject(mainWindow, {
+                             identifier: Logic.Owner.PlayerB + i,
+                            n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                             y: Qt.binding(function() { return 2 * mainWindow.height / 3 + (mainWindow.height < mainWindow.width ?
+                                                                                            mainWindow.height * 0.12:
+                                                                                            mainWindow.width * 0.12) + 10 }),
+                            count: 5,
+                             owner: Logic.Owner.PlayerB,
+                             shipType: Logic.ShipType.Destroyer
+                             })]);
+                playerBObjects[i].init();
+            }
+             else {
+                playerBComponents = playerBComponents.concat([Qt.createComponent("FormationItem.qml")]);
+                playerBObjects = playerBObjects.concat(
+                        [playerBComponents[i].createObject(mainWindow, {
+                            identifier: Logic.Owner.PlayerB + i,
+                             n: i,
+                            x: Qt.binding(function() { return mainWindow.width / 5 + this.n * ((mainWindow.height < mainWindow.width ?
+                                                                                                mainWindow.height * 0.12:
+                                                                                                mainWindow.width * 0.12) + 10) }),
+                             y: Qt.binding(function() { return 2 * mainWindow.height / 3 + (mainWindow.height < mainWindow.width ?
+                                                                                            mainWindow.height * 0.12:
+                                                                                            mainWindow.width * 0.12) + 10 }),
+                             count: 20,
+                             owner: Logic.Owner.PlayerB,
+                             shipType: Logic.ShipType.Drednot
+                             })]);
+                 playerBObjects[i].init();
+              }
+        }
+
+
+    } // new game
+
+
 
 } // ApplicationWindow

@@ -19,5 +19,7 @@
         <file>Star_Wars_-_Fantasy_Suite_Movement_2_-_Jarrod_Radnich_Virtuosic_Piano_Solo_4K[YoutubeConverter.Me].mp3</file>
         <file>speaker.png</file>
         <file>no-speaker.png</file>
+        <file>fullscreen.png</file>
+        <file>windowed.png</file>
     </qresource>
 </RCC>
