@@ -1,8 +1,23 @@
 <RCC>
     <qresource prefix="/">
         <file>main.qml</file>
-        <file>Page1.qml</file>
-        <file>Page1Form.ui.qml</file>
         <file>qtquickcontrols2.conf</file>
+        <file>cruiser.jpg</file>
+        <file>deep-space.jpg</file>
+        <file>destroyer.jpg</file>
+        <file>drednot.jpg</file>
+        <file>heavyfighter-1.jpg</file>
+        <file>jetfighter.jpg</file>
+        <file>superdestroyer.jpg</file>
+        <file>XorGameQuick.js</file>
+        <file>FormationItem.qml</file>
+        <file>CloseButton.png</file>
+        <file>NewGameButton.png</file>
+        <file>CloseHovered.png</file>
+        <file>NewGameHover.png</file>
+        <file>ShootingTimer.qml</file>
+        <file>Star_Wars_-_Fantasy_Suite_Movement_2_-_Jarrod_Radnich_Virtuosic_Piano_Solo_4K[YoutubeConverter.Me].mp3</file>
+        <file>speaker.png</file>
+        <file>no-speaker.png</file>
     </qresource>
 </RCC>
